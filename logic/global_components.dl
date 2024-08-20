@@ -196,6 +196,13 @@
   BlockValidNext(ctx, block, next):-
     BlockJumpValidTarget(ctx, block, _, next).
 
+  BlockValidNext(ctx, block, next):-
+    ReachableContext(ctx, block),
+    ImmediateBlockJumpTarget(block, var),
+    BasicBlock_Tail(block, jump),
+    RuntimeJumpTarget(jump, next),
+    !Variable_Value(var, _).
+
   BlockValidNext(ctx, block, fallthrough):-
     ReachableContext(ctx, block),
     FallthroughEdge(block, fallthrough).

@@ -14,6 +14,8 @@
   
 }
 
+.decl RuntimeJumpTarget(jump: Statement, next: Block)
+.input RuntimeJumpTarget(IO="file", filename="RuntimeJumpTarget.facts")
 
 .decl ByteCodeHex(bytecode:symbol)
 

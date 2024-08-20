@@ -110,12 +110,13 @@ class InstructionTsvExporter(TsvExporter):
     """
 
     def __init__(self, output_dir: str, blocks: List[basicblock.EVMBasicBlock], ordered: bool = True,
-                 bytecode_hex: Optional[str] = None, metadata: Optional[Dict[Any, Any]] = None):
+                 bytecode_hex: Optional[str] = None, metadata: Optional[Dict[Any, Any]] = None, runtime_cfg: Optional[Dict[Any, Any]] = None):
         super().__init__(output_dir)
         self.blocks = blocks
         self.ordered = ordered
         self.bytecode_hex = bytecode_hex
         self.process_metadata(metadata)
+        self.process_runtime_cfg(runtime_cfg)
 
     def process_metadata(self, metadata: Optional[Dict[Any, Any]] = None) -> None:
         """
@@ -140,6 +141,20 @@ class InstructionTsvExporter(TsvExporter):
 
         self.function_debug_data = process_function_debug_data(metadata.get('function_debug_info', {})) if metadata is not None else []
         self.immutable_references = process_immutable_refs(metadata.get('immutable_references', {})) if metadata is not None else []
+
+    def process_runtime_cfg(self, runtime_cfg: Optional[Dict[Any, Any]] = None) -> None:
+        processed = []
+        for tx in runtime_cfg:
+            if tx["txhash"] != "0xe8164b3e41f0fd959fc9cc14d0d3524c8f9172a2e5a36bc7d362fb3cd45a38c7":
+                continue
+            for blk, targets in tx["all_jump"].items():
+                processed.append([blk, targets[0]])
+            for blk, targets in tx["all_jumpi"].items():
+                processed.append([blk, targets[0][0]])
+
+            break
+
+        self.runtime_cfg = processed
 
     def export(self):
         """
@@ -221,3 +236,4 @@ class InstructionTsvExporter(TsvExporter):
 
         self.generate('HighLevelFunctionInfo.facts', self.function_debug_data)
         self.generate('ImmutableLoads.facts', self.immutable_references)
+        self.generate('RuntimeJumpTarget.facts', self.runtime_cfg)

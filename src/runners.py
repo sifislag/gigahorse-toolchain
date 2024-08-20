@@ -312,9 +312,14 @@ class DecompilerFactGenerator(AbstractFactGenerator):
             else:
                 metadata = {}
 
+            if os.path.exists(runt:= f"{contract_filename[:-4]}_control.json"):
+                runtime_cfg = json.load(open(runt))
+            else:
+                runtime_cfg = {}
+
         disassemble_start = time.time()
         blocks = blockparse.EVMBytecodeParser(bytecode).parse()
-        exporter.InstructionTsvExporter(work_dir, blocks, True, bytecode, metadata).export()
+        exporter.InstructionTsvExporter(work_dir, blocks, True, bytecode, metadata, runtime_cfg).export()
 
         os.symlink(join(work_dir, 'bytecode.hex'), join(out_dir, 'bytecode.hex'))
 

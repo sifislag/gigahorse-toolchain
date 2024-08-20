@@ -19,20 +19,23 @@ def main(args):
         logging.info("Generating decompiler input interface")
         exporter.generate_interface()
         return
+    metadata = {}
+    runtime_cfg = {}
     if args.disassembly:
         blocks = blockparse.EVMDasmParser(args.infile).parse()
-        metadata = {}
     else:
         bytecode = args.infile.read().strip()
+
         if os.path.exists(metad:= f"{args.infile.name[:-4]}_metadata.json"):
             metadata = json.load(open(metad))
-        else:
-            metadata = {}
+        if os.path.exists(runt:= f"{args.infile.name[:-4]}_control.json"):
+            runtime_cfg = json.load(open(runt))
+
         blocks = blockparse.EVMBytecodeParser(bytecode).parse()
     logging.info("Initial parsing completed.")
 
     logging.info("Writing facts to disk.")
-    exporter.InstructionTsvExporter(args.outdir, blocks, bytecode_hex=bytecode, metadata=metadata).export()
+    exporter.InstructionTsvExporter(args.outdir, blocks, bytecode_hex=bytecode, metadata=metadata, runtime_cfg=runtime_cfg).export()
 
 if __name__ == '__main__':
     # Configure argparse
